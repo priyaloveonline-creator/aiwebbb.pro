@@ -593,6 +593,60 @@ input,textarea{font-family:inherit}
   .right-panel{display:none}
   .chat-act,.tb-user{display:none}
   .apps-grid{grid-template-columns:repeat(3,1fr)}
+
+  /* Topbar: stop clipping — search bar shrinks instead of overflowing */
+  .topbar{padding:0 .75rem;gap:.4rem}
+  .search{min-width:0;flex:1 1 auto}
+  .search-kbd{display:none}
+  .upgrade-pill{padding:.4rem .65rem;font-size:.7rem}
+  .upgrade-pill span,.upgrade-pill{white-space:nowrap}
+  .tb-right{gap:.35rem}
+  .tb-icon{width:32px;height:32px;font-size:.8rem}
+  .tb-av{width:32px;height:32px}
+
+  /* Chat top pills wrap safely instead of overflowing */
+  .chat-top{flex-wrap:wrap;height:auto;min-height:56px;padding:.5rem .75rem;gap:.4rem}
+
+  /* CRITICAL: reserve space so fixed bottom mob-nav never covers the
+     attach/web-search/reason/mic toolbar or page content */
+  .chat-foot{padding-bottom:calc(.75rem + 72px)}
+  .inner-body,.home-center,.billing-wrap,.settings-wrap,.tools-wrap{padding-bottom:88px}
+  .chat-msgs{padding-bottom:1rem}
+
+  /* Compare page: horizontal swipe, one panel at a time, full readability */
+  .compare-wrap{padding:.85rem}
+  .compare-panels{grid-auto-flow:column;grid-auto-columns:88%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:88px}
+  .cpanel{scroll-snap-align:start;min-width:0}
+  .model-pills-bar{padding-bottom:2px}
+  .compare-header{flex-wrap:wrap;gap:.5rem}
+  .compare-header > div:last-child{margin-left:0!important;width:100%;justify-content:flex-end}
+
+  /* Chat input toolbar: icon-only, tighter, guaranteed to fit */
+  .input-tools{flex-wrap:nowrap;overflow-x:auto;gap:2px;padding:.35rem .5rem .5rem}
+  .input-tool{padding:4px 7px;font-size:0;gap:0;flex-shrink:0}
+  .input-tool::before{font-size:.95rem}
+  .input-tool:nth-child(1)::before{content:'＋'}
+  .input-tool:nth-child(2)::before{content:'📎'}
+  .input-tool:nth-child(3)::before{content:'🌐'}
+  .input-tool:nth-child(4)::before{content:'💡'}
+  .input-tool:nth-child(5)::before{content:'🎤'}
+  .qp-bar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}
+  .qp-lbl{display:none}
+
+  /* Tools & tiers: usable column counts on phones */
+  .pop-tools{grid-template-columns:repeat(2,1fr)}
+  .all-tools{grid-template-columns:repeat(2,1fr)}
+  .tiers{grid-template-columns:repeat(2,1fr)}
+  .bookmarks-grid{grid-template-columns:repeat(1,1fr)!important}
+
+  /* Modal fits small screens */
+  .modal-box{max-width:92vw;padding:1.1rem}
+}
+@media(max-width:420px){
+  .apps-grid{grid-template-columns:repeat(2,1fr)}
+  .pop-tools,.all-tools,.tiers{grid-template-columns:repeat(1,1fr)}
+  .tb-icon:nth-child(1){display:none} /* hide notification bell on very small phones */
+  .search input::placeholder{font-size:.72rem}
 }
 .mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:.5rem 1rem;z-index:200;justify-content:space-around}
 @media(max-width:768px){.mob-nav{display:flex}}
@@ -757,9 +811,7 @@ input,textarea{font-family:inherit}
           <div class="prov-bubble" id="wb-gemini"></div>
           <div class="prov-bubble" id="wb-grok"></div>
           <div class="prov-bubble" id="wb-deepseek" style="background:#0f6cf7"></div>
-          <div class="prov-bubble" id="wb-free" style="background:var(--purple)">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px"><circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/><path d="M12 7v10M7 12h10" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
-          </div>
+          <div class="prov-bubble" id="wb-free"></div>
         </div>
       </div>
 
@@ -1112,6 +1164,9 @@ function iconImg(key){
   if(key==='deepseek'){
     return `<div style="width:100%;height:100%;background:#0f6cf7;border-radius:inherit;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${ICONS.deepseek}" style="width:80%;height:80%;object-fit:contain" draggable="false"></div>`;
   }
+  if(key==='free'){
+    return `<div style="width:100%;height:100%;background:#111827;border-radius:inherit;display:flex;align-items:center;justify-content:center;padding:18%;box-sizing:border-box"><img src="${ICONS.aiwebbb}" style="width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1)" draggable="false"></div>`;
+  }
   return `<img src="${ICONS[key]}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block" draggable="false">`;
 }
 
@@ -1156,8 +1211,8 @@ const PV = {
   free: {
     name:'AI+', plan:'free',
     bg:'#7c3aed',
-    iconHtml:`<div style="width:100%;height:100%;background:#7c3aed;border-radius:inherit;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:65%;height:65%"><circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/><path d="M12 7v10M7 12h10" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></div>`,
-    models:[{id:'openrouter/owl-alpha',n:'Owl Alpha',d:'General chat'},{id:'openai/gpt-oss-120b:free',n:'GPT-OSS 120B',d:'Coding & math'},{id:'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',n:'Nemotron Omni',d:'Multimodal'},{id:'meta-llama/llama-3.3-70b-instruct:free',n:'Llama 3.3 70B',d:'Writing'},{id:'nvidia/nemotron-3-super-120b-a12b:free',n:'Nemotron Super',d:'Reasoning'}],
+    iconHtml:`<div style="width:100%;height:100%;background:#111827;border-radius:inherit;display:flex;align-items:center;justify-content:center;padding:18%;box-sizing:border-box"><img src="${ICONS.aiwebbb}" style="width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1)" draggable="false"></div>`,
+    models:[{id:'openrouter/free',n:'AIWEBBB Free',d:'Auto-selects a free model'},{id:'meta-llama/llama-3.3-70b-instruct:free',n:'Llama 3.3 70B',d:'Writing & general chat'},{id:'nvidia/nemotron-nano-12b-v2-vl:free',n:'Nemotron Nano VL',d:'Vision & images'}],
     starters:['Help me with coding','Write an essay','Explain a concept','Analyze my document'],
   },
 };
@@ -1218,7 +1273,7 @@ function populateStaticIcons(){
   Object.entries(sbMap).forEach(([elId,key])=>{
     const el=$('sbi-'+elId); if(el) el.innerHTML=iconImg(key);
   });
-  ['chatgpt','claude','gemini','grok','deepseek'].forEach(key=>{
+  ['chatgpt','claude','gemini','grok','deepseek','free'].forEach(key=>{
     const el=$('wb-'+key); if(el) el.innerHTML=iconImg(key);
   });
   const authIcon=$('auth-chatgpt-icon'); if(authIcon) authIcon.innerHTML=iconImg('chatgpt');
@@ -1651,39 +1706,84 @@ function smartRoute(){
 }
 
 // ── COMPARE
-const CMP_MODELS=[
-  {pid:'chatgpt',mid:'openai/gpt-4o',n:'GPT-5',badge:'Latest'},
-  {pid:'gemini', mid:'google/gemini-2.5-pro',n:'Gemini 1.5 Pro',badge:'Premium'},
-  {pid:'claude', mid:'anthropic/claude-opus-4-8',n:'Claude 4 Opus',badge:'Premium'},
-  {pid:'deepseek',mid:'deepseek/deepseek-r1-0528',n:'DeepSeek V3.1',badge:'Budget'},
+let CMP_STATE=[
+  {pid:'chatgpt',mid:'openai/gpt-4o',n:'GPT-4o',badge:'Latest'},
+  {pid:'gemini', mid:'google/gemini-2.5-pro',n:'Gemini 2.5 Pro',badge:'Premium'},
+  {pid:'claude', mid:'anthropic/claude-opus-4-8',n:'Claude Opus 4.8',badge:'Premium'},
+  {pid:'deepseek',mid:'deepseek/deepseek-r1-0528',n:'DeepSeek R1',badge:'Budget'},
 ];
-function buildCompare(){
+function buildCompare(){ renderCompareUI(); }
+function renderCompareUI(){
   const bar=$('compare-bar'),panels=$('compare-panels');
-  bar.innerHTML=CMP_MODELS.map((m,i)=>{
+  bar.innerHTML=CMP_STATE.map((m,i)=>{
     const p=PV[m.pid];
     return `<div class="model-pill">
       <div style="width:20px;height:20px;border-radius:5px;overflow:hidden;flex-shrink:0">${p.iconHtml}</div>
-      ${m.n} <span style="font-size:.6rem;background:var(--bg3);padding:1px 5px;border-radius:4px">${m.badge}</span>
-      <span style="color:var(--txt3);cursor:pointer" onclick="toast('Remove model coming soon','✨')">×</span>
+      ${esc(m.n)} ${m.badge?`<span style="font-size:.6rem;background:var(--bg3);padding:1px 5px;border-radius:4px">${m.badge}</span>`:''}
+      <span style="color:var(--txt3);cursor:pointer" onclick="removeCompareModel(${i})">×</span>
     </div>`;
-  }).join('')+`<div class="add-pill" onclick="toast('Add model coming!','✨')">＋ Add Model<br><span style="font-size:.6rem">Choose any AI model</span></div>`;
-  panels.style.gridTemplateColumns=`repeat(${CMP_MODELS.length},1fr)`;
-  panels._models=CMP_MODELS;
-  panels.innerHTML=CMP_MODELS.map((m,i)=>{
+  }).join('')+(CMP_STATE.length<6?`<div class="add-pill" onclick="openAddModelModal()">＋ Add Model<br><span style="font-size:.6rem">Choose any AI model</span></div>`:'');
+  panels.style.gridTemplateColumns=`repeat(${CMP_STATE.length},1fr)`;
+  panels._models=CMP_STATE;
+  panels.innerHTML=CMP_STATE.map((m,i)=>{
     const p=PV[m.pid];
     return `<div class="cpanel">
       <div class="cpanel-head">
         <div class="cpanel-icon">${p.iconHtml}</div>
-        <div><div class="cpanel-name">${m.n}</div><div class="cpanel-model">${p.name}</div></div>
+        <div><div class="cpanel-name">${esc(m.n)}</div><div class="cpanel-model">${p.name}</div></div>
         ${m.badge?`<div class="cpanel-badge">${m.badge}</div>`:''}
         <div class="cpanel-time" id="ct-${i}" style="display:none"></div>
-        <div class="cpanel-close">×</div>
+        <div class="cpanel-close" onclick="removeCompareModel(${i})">×</div>
       </div>
       <div class="cpanel-body" id="cb-${i}">Response will appear here...</div>
     </div>`;
   }).join('');
 }
-function clearCompare(){buildCompare();$('cmp-ta').value='';$('cmp-count').textContent='0 / 10,000';}
+function removeCompareModel(idx){
+  if(CMP_STATE.length<=1){toast('Keep at least one model','⚠');return;}
+  CMP_STATE.splice(idx,1);
+  renderCompareUI();
+}
+function openAddModelModal(){
+  const all=Object.entries(PV).flatMap(([pid,p])=>p.models.map(m=>({pid,mid:m.id,n:m.n,d:m.d})));
+  window._addModelPool=all;
+  openModal(`
+    <div style="font-size:1rem;font-weight:800;color:var(--txt);margin-bottom:.25rem">⊞ Add a Model to Compare</div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:1rem">Pick any model — up to 6 side by side</div>
+    <input id="addmodel-search" class="fi" placeholder="Search models..." style="margin-bottom:.75rem" oninput="filterAddModelList()">
+    <div id="addmodel-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:2px"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:.75rem">
+      <button class="btn-sec" onclick="closeModal()">Done</button>
+    </div>
+  `);
+  renderAddModelList(all);
+}
+function renderAddModelList(models){
+  const el=$('addmodel-list');
+  if(!models.length){el.innerHTML=`<div style="text-align:center;color:var(--txt3);font-size:.8rem;padding:1.5rem">No models match your search</div>`;return;}
+  el.innerHTML=models.map(m=>{
+    const p=PV[m.pid];
+    const already=CMP_STATE.some(x=>x.mid===m.mid);
+    return `<div class="dd-item${already?' sel':''}" style="cursor:${already?'default':'pointer'}" ${already?'':`onclick="addCompareModel('${m.pid}','${m.mid.replace(/'/g,"\\'")}','${m.n.replace(/'/g,"\\'")}')"`}>
+      <div class="dd-item-icon">${p.iconHtml}</div>
+      <div><div class="dd-name">${esc(m.n)}</div><span class="dd-desc">${p.name} · ${esc(m.d)}</span></div>
+      ${already?'<div class="dd-check">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+function filterAddModelList(){
+  const q=$('addmodel-search').value.toLowerCase();
+  renderAddModelList((window._addModelPool||[]).filter(m=>m.n.toLowerCase().includes(q)||PV[m.pid].name.toLowerCase().includes(q)));
+}
+function addCompareModel(pid,mid,n){
+  if(CMP_STATE.length>=6){toast('Maximum 6 models in a comparison','⚠');return;}
+  if(CMP_STATE.some(x=>x.mid===mid)){toast('Already added','⚠');return;}
+  CMP_STATE.push({pid,mid,n,badge:null});
+  renderCompareUI();
+  toast(`${n} added`,'✅');
+  renderAddModelList(window._addModelPool||[]);
+}
+function clearCompare(){$('cmp-ta').value='';$('cmp-count').textContent='0 / 10,000';renderCompareUI();}
 async function runCompare(){
   const prompt=$('cmp-ta').value.trim();if(!prompt)return;
   const models=$('compare-panels')._models;if(!models)return;
@@ -1739,8 +1839,39 @@ function renderWebbb(models){
 function openProvModel(pid,mid,mn){S.prov=pid;S.model=mid;S.modelName=mn;buildProvDD();buildModelDD();updateChatUI();resetChat();goPage('chat');}
 
 // ── TOOLS
+// ── TOOL CONFIGURATION — model choice never shown to the user, per product decision
+const TOOL_CONFIG={
+  'AI Image Generator': {type:'image', model:'openai/gpt-image-1'},
+  'AI Chat':            {type:'text',  model:'openai/gpt-5.4-mini', sys:'You are a helpful, friendly AI assistant. Answer clearly and concisely.'},
+  'AI Writer':           {type:'text',  model:'openai/gpt-5.4-mini', sys:'You are an expert content writer. Write clear, engaging, well-structured content based on the request.'},
+  'AI Code Generator':   {type:'text',  model:'openai/gpt-5.5',      sys:'You are an expert software engineer. Generate clean, correct, well-commented code. Use markdown code blocks.'},
+  'AI Summarizer':       {type:'text',  model:'openai/gpt-5.4-nano', sys:'Summarize the following text concisely, capturing only the key points.'},
+  'AI Translator':       {type:'text',  model:'openai/gpt-5.4-nano', sys:'Translate the user\'s text. If no target language is specified, translate to English. Return only the translation, nothing else.'},
+  'AI Grammar Checker':  {type:'text',  model:'openai/gpt-5.4-nano', sys:'Fix all grammar, spelling, and punctuation errors in the following text. Return only the corrected text.'},
+  'AI Paraphraser':      {type:'text',  model:'openai/gpt-5.4-mini', sys:'Rephrase the following text in different words while fully preserving its original meaning.'},
+  'AI Content Detector': {type:'text',  model:'openai/gpt-5.4-mini', sys:'Analyze the following text and estimate the likelihood it was AI-generated vs human-written. Give a percentage estimate and 2-3 sentences of reasoning. Note clearly this is a heuristic estimate, not a certified detector.'},
+  'AI PDF Analyzer':     {type:'text',  model:'openai/gpt-5.4-mini', sys:'Analyze and summarize the following document content, highlighting the key points, structure, and any important details.', placeholder:'Paste the document text here (or a summary of what it contains)...'},
+  'AI Video Generator':  {type:'video', model:'kwaivgi/kling-v3.0-std'},
+  'AI Audio Transcriber':{type:'stt'},
+  'AI Voice Generator':  {type:'tts'},
+  'AI Image Editor':     {type:'image-edit', model:'openai/gpt-image-1', editPrompt:null},
+  'Background Remover':  {type:'image-edit', model:'openai/gpt-image-1', editPrompt:'Remove the background completely. Output the main subject only on a clean transparent background, as a precise cutout.'},
+  'AI Resume Builder':   {type:'text',  model:'openai/gpt-5.4-mini', sys:'You are a professional resume writer. Create a polished, well-formatted resume in markdown based on the details provided.'},
+  'AI Mind Map':         {type:'text',  model:'openai/gpt-5.4-mini', sys:'Create a hierarchical mind map as nested markdown bullet points for the following topic.'},
+  'AI Title Generator':  {type:'text',  model:'openai/gpt-5.4-nano', sys:'Generate 8 catchy, click-worthy titles for the following topic. Return as a numbered markdown list, nothing else.'},
+  'AI Hashtag Generator':{type:'text',  model:'openai/gpt-5.4-nano', sys:'Generate 15-20 relevant, trending hashtags for the following content. Return as a single space-separated line, nothing else.'},
+  'AI Ad Generator':     {type:'text',  model:'openai/gpt-5.4-mini', sys:'You are an expert copywriter. Create 3 compelling ad copy variations (headline + body) for the following product or service.'},
+};
 function toolClickHandler(name){
-  if(name==='AI Image Generator') return `openImageGenModal()`;
+  const cfg=TOOL_CONFIG[name];
+  if(!cfg) return `toast('${name} is coming soon 🚧','🔧')`;
+  const esc2=name.replace(/'/g,"\\'");
+  if(cfg.type==='text') return `openTextToolModal('${esc2}')`;
+  if(cfg.type==='image') return `openImageGenModal()`;
+  if(cfg.type==='image-edit') return `openImageEditModal('${esc2}')`;
+  if(cfg.type==='tts') return `openTTSModal()`;
+  if(cfg.type==='stt') return `openSTTModal()`;
+  if(cfg.type==='video') return `openVideoModal()`;
   return `toast('${name} is coming soon 🚧','🔧')`;
 }
 function buildTools(){
@@ -1750,9 +1881,67 @@ function buildTools(){
   $('all-tools').innerHTML=TOOLS_DATA.map(t=>`<div class="tool-card" onclick="${toolClickHandler(t.n)}"><div class="tool-card-icon" style="background:${t.bg}">${t.icon}</div><div><div class="tool-card-name">${t.n}</div><div class="tool-card-desc">${t.d}</div></div></div>`).join('');
 }
 
-// ── MODAL (generic, used by AI Image Generator)
+// ── MODAL (generic host used by every tool below)
 function openModal(html){ $('modal-box').innerHTML=html; $('modal-overlay').classList.add('open'); }
 function closeModal(){ $('modal-overlay').classList.remove('open'); }
+
+// ── GENERIC TEXT TOOL (covers 13 of the 20 tools: chat, writer, code,
+//    summarizer, translator, grammar, paraphraser, detector, PDF analyzer,
+//    resume, mind map, titles, hashtags, ads)
+function openTextToolModal(toolName){
+  const t=TOOLS_DATA.find(x=>x.n===toolName);
+  const cfg=TOOL_CONFIG[toolName];
+  openModal(`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
+      <div style="font-size:1.4rem">${t?.icon||'✦'}</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--txt)">${esc(toolName)}</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:1rem">${esc(t?.d||'')}</div>
+    <textarea id="tt-input" placeholder="${esc(cfg.placeholder||'Type or paste your text here...')}" style="width:100%;min-height:110px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:.75rem;font-family:inherit;font-size:.85rem;color:var(--txt);outline:none;resize:vertical;margin-bottom:1rem"></textarea>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.75rem">
+      <button class="btn-sec" onclick="closeModal()">Cancel</button>
+      <button class="btn-pri" id="tt-btn" onclick="runTextTool('${toolName.replace(/'/g,"\\'")}')">✦ Run</button>
+    </div>
+    <div id="tt-status" style="font-size:.78rem;color:var(--txt3);margin-bottom:.5rem"></div>
+    <div id="tt-result" style="display:none;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:1rem;max-height:320px;overflow-y:auto;font-size:.85rem;color:var(--txt);line-height:1.65"></div>
+    <div id="tt-actions" style="display:none;gap:.4rem;margin-top:.6rem;justify-content:flex-end">
+      <button class="btn-sec" onclick="copyToolResult()">⧉ Copy</button>
+    </div>
+  `);
+}
+let _lastToolResult='';
+async function runTextTool(toolName){
+  const cfg=TOOL_CONFIG[toolName];
+  const input=$('tt-input').value.trim();
+  if(!input){toast('Please enter some text first','⚠');return;}
+  const btn=$('tt-btn');btn.disabled=true;btn.textContent='Working…';
+  $('tt-status').textContent='Generating…';
+  $('tt-result').style.display='none';
+  $('tt-actions').style.display='none';
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:cfg.model,messages:[{role:'system',content:cfg.sys},{role:'user',content:input}]})});
+    if(!res.ok||!res.body){const eb=await res.json().catch(()=>({error:`HTTP ${res.status}`}));throw new Error(eb.error||'Request failed');}
+    const reader=res.body.getReader();const dec=new TextDecoder();let full='';
+    const resultEl=$('tt-result');resultEl.style.display='block';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      for(const line of dec.decode(value).split('\n')){
+        if(!line.startsWith('data: '))continue;const raw=line.slice(6);if(raw==='[DONE]')break;
+        try{const d=JSON.parse(raw);const c=d.choices?.[0]?.delta?.content||'';if(c){full+=c;resultEl.innerHTML=marked.parse(full);}}catch{}
+      }
+    }
+    _lastToolResult=full;
+    $('tt-status').textContent='';
+    $('tt-actions').style.display='flex';
+  }catch(err){
+    $('tt-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+  }
+  btn.disabled=false;btn.textContent='✦ Run';
+}
+function copyToolResult(){navigator.clipboard?.writeText(_lastToolResult);toast('Copied!','✅');}
+
+// ── IMAGE GENERATOR
 function openImageGenModal(){
   openModal(`
     <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
@@ -1775,7 +1964,7 @@ async function runImageGen(){
   $('imggen-status').textContent='This can take up to 30 seconds…';
   try{
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'black-forest-labs/flux-schnell',messages:[{role:'user',content:prompt}]})});
+      body:JSON.stringify({model:TOOL_CONFIG['AI Image Generator'].model,messages:[{role:'user',content:prompt}]})});
     if(!res.ok||!res.body){const eb=await res.json().catch(()=>({error:`HTTP ${res.status}`}));throw new Error(eb.error||'Generation failed');}
     const reader=res.body.getReader();const dec=new TextDecoder();let full='';let imageUrl=null;
     while(true){
@@ -1803,6 +1992,245 @@ async function runImageGen(){
     $('imggen-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
   }
   btn.disabled=false;btn.textContent='✦ Generate';
+}
+
+// ── IMAGE EDITOR / BACKGROUND REMOVER (upload image + instruction)
+function openImageEditModal(toolName){
+  const cfg=TOOL_CONFIG[toolName];
+  const isRemover=toolName==='Background Remover';
+  openModal(`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
+      <div style="font-size:1.4rem">${isRemover?'✂':'🖌'}</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--txt)">${esc(toolName)}</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:1rem">Upload an image${isRemover?'':' and describe the edit'} — result saves to Projects.</div>
+    <input type="file" id="ie-file" accept="image/*" style="margin-bottom:.75rem;font-size:.8rem;color:var(--txt)">
+    <div id="ie-preview" style="display:none;margin-bottom:.75rem"><img style="max-width:100%;max-height:160px;border-radius:10px;border:1px solid var(--border)"></div>
+    ${isRemover?'':`<textarea id="ie-prompt" placeholder="e.g. change the sky to sunset colors" style="width:100%;min-height:70px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:.75rem;font-family:inherit;font-size:.85rem;color:var(--txt);outline:none;resize:vertical;margin-bottom:1rem"></textarea>`}
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;${isRemover?'margin-top:1rem':''}">
+      <button class="btn-sec" onclick="closeModal()">Cancel</button>
+      <button class="btn-pri" id="ie-btn" onclick="runImageEdit('${toolName.replace(/'/g,"\\'")}')">✦ ${isRemover?'Remove Background':'Apply Edit'}</button>
+    </div>
+    <div id="ie-status" style="margin-top:.75rem;font-size:.78rem;color:var(--txt3)"></div>
+  `);
+  $('ie-file').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const url=URL.createObjectURL(f);
+    const prev=$('ie-preview');prev.style.display='block';prev.querySelector('img').src=url;
+  });
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+async function runImageEdit(toolName){
+  const cfg=TOOL_CONFIG[toolName];
+  const file=$('ie-file').files[0];
+  if(!file){toast('Please upload an image first','⚠');return;}
+  const instruction=cfg.editPrompt||$('ie-prompt')?.value.trim()||'Edit this image as described.';
+  const btn=$('ie-btn');btn.disabled=true;btn.textContent='Processing…';
+  $('ie-status').textContent='This can take up to 30 seconds…';
+  try{
+    const dataUrl=await fileToBase64(file);
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:cfg.model,messages:[{role:'user',content:[
+        {type:'text',text:instruction},
+        {type:'image_url',image_url:{url:dataUrl}},
+      ]}]})});
+    if(!res.ok||!res.body){const eb=await res.json().catch(()=>({error:`HTTP ${res.status}`}));throw new Error(eb.error||'Edit failed');}
+    const reader=res.body.getReader();const dec=new TextDecoder();let full='';let imageUrl=null;
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      for(const line of dec.decode(value).split('\n')){
+        if(!line.startsWith('data: '))continue;const raw=line.slice(6);if(raw==='[DONE]')break;
+        try{
+          const d=JSON.parse(raw);const delta=d.choices?.[0]?.delta;
+          if(delta?.content)full+=delta.content;
+          const imgs=delta?.images||d.choices?.[0]?.message?.images;
+          if(imgs&&imgs.length)imageUrl=imgs[0]?.image_url?.url||imgs[0];
+        }catch{}
+      }
+    }
+    if(!imageUrl&&/^https?:\/\/\S+\.(png|jpg|jpeg|webp)/i.test(full.trim()))imageUrl=full.trim();
+    if(!imageUrl)throw new Error('This model did not return an edited image this time. Please try again.');
+
+    await sb.from('projects').insert({user_id:S.user.id,tool_type:'image',title:toolName+': '+instruction.slice(0,50),prompt:instruction,output_url:imageUrl,thumbnail_url:imageUrl});
+    toast('Saved to Projects! 🎉','✅');
+    closeModal();
+    goPage('projects');
+  }catch(err){
+    $('ie-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+  }
+  btn.disabled=false;btn.textContent='✦ Apply';
+}
+
+// ── AI VOICE GENERATOR (text-to-speech)
+function openTTSModal(){
+  openModal(`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
+      <div style="font-size:1.4rem">🎙</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--txt)">AI Voice Generator</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:1rem">Type text and choose a voice.</div>
+    <textarea id="tts-text" placeholder="Type what you want spoken aloud..." style="width:100%;min-height:90px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:.75rem;font-family:inherit;font-size:.85rem;color:var(--txt);outline:none;resize:vertical;margin-bottom:.75rem"></textarea>
+    <select id="tts-voice" class="sf" style="margin-bottom:1rem">
+      <option value="alloy">Alloy</option>
+      <option value="echo">Echo</option>
+      <option value="fable">Fable</option>
+      <option value="nova">Nova</option>
+      <option value="shimmer">Shimmer</option>
+    </select>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn-sec" onclick="closeModal()">Cancel</button>
+      <button class="btn-pri" id="tts-btn" onclick="runTTS()">✦ Generate Speech</button>
+    </div>
+    <div id="tts-status" style="margin-top:.75rem;font-size:.78rem;color:var(--txt3)"></div>
+    <div id="tts-player" style="margin-top:.75rem;display:none"></div>
+  `);
+}
+async function runTTS(){
+  const text=$('tts-text').value.trim();
+  if(!text){toast('Enter some text first','⚠');return;}
+  const voice=$('tts-voice').value;
+  const btn=$('tts-btn');btn.disabled=true;btn.textContent='Generating…';
+  $('tts-status').textContent='Generating audio…';
+  try{
+    const res=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice})});
+    if(!res.ok){const eb=await res.json().catch(()=>({error:`HTTP ${res.status}`}));throw new Error(eb.error||'Speech generation failed');}
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    $('tts-status').textContent='';
+    const player=$('tts-player');player.style.display='block';
+    player.innerHTML=`<audio controls style="width:100%" src="${url}"></audio>`;
+
+    // Upload to Supabase Storage so it persists in Projects (not just this session)
+    const path=`${S.user.id}/tts_${Date.now()}.mp3`;
+    const { error:upErr } = await sb.storage.from('documents').upload(path,blob,{contentType:'audio/mpeg'});
+    if(!upErr){
+      const { data:signed } = await sb.storage.from('documents').createSignedUrl(path,60*60*24*7);
+      await sb.from('projects').insert({user_id:S.user.id,tool_type:'audio',title:text.slice(0,60),prompt:text,output_url:signed?.signedUrl||url});
+      toast('Saved to Projects! 🎉','✅');
+    }
+  }catch(err){
+    $('tts-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+  }
+  btn.disabled=false;btn.textContent='✦ Generate Speech';
+}
+
+// ── AI AUDIO TRANSCRIBER (speech-to-text)
+function openSTTModal(){
+  openModal(`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
+      <div style="font-size:1.4rem">🎤</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--txt)">AI Audio Transcriber</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:1rem">Upload an audio file (mp3, wav, m4a — up to 25MB).</div>
+    <input type="file" id="stt-file" accept="audio/*" style="margin-bottom:1rem;font-size:.8rem;color:var(--txt)">
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn-sec" onclick="closeModal()">Cancel</button>
+      <button class="btn-pri" id="stt-btn" onclick="runSTT()">✦ Transcribe</button>
+    </div>
+    <div id="stt-status" style="margin-top:.75rem;font-size:.78rem;color:var(--txt3)"></div>
+    <div id="stt-result" style="display:none;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:1rem;margin-top:.5rem;max-height:260px;overflow-y:auto;font-size:.85rem;color:var(--txt);line-height:1.6"></div>
+    <div id="stt-actions" style="display:none;gap:.4rem;margin-top:.6rem;justify-content:flex-end">
+      <button class="btn-sec" onclick="copyToolResult()">⧉ Copy</button>
+    </div>
+  `);
+}
+async function runSTT(){
+  const file=$('stt-file').files[0];
+  if(!file){toast('Please upload an audio file first','⚠');return;}
+  if(file.size>25*1024*1024){toast('File too large — 25MB max','⚠');return;}
+  const btn=$('stt-btn');btn.disabled=true;btn.textContent='Transcribing…';
+  $('stt-status').textContent='This can take a moment…';
+  try{
+    const dataUrl=await fileToBase64(file);
+    const res=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audioBase64:dataUrl})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Transcription failed');
+    _lastToolResult=data.text||'';
+    $('stt-status').textContent='';
+    const resEl=$('stt-result');resEl.style.display='block';resEl.textContent=data.text||'(no speech detected)';
+    $('stt-actions').style.display='flex';
+  }catch(err){
+    $('stt-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+  }
+  btn.disabled=false;btn.textContent='✦ Transcribe';
+}
+
+// ── AI VIDEO GENERATOR (async job — costs real money per second, be deliberate)
+function openVideoModal(){
+  openModal(`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
+      <div style="font-size:1.4rem">🎬</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--txt)">AI Video Generator</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt3);margin-bottom:.75rem">Describe the video. Generation takes 1-3 minutes.</div>
+    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:9px;padding:.6rem .75rem;font-size:.72rem;color:#92400e;margin-bottom:.75rem">⚠ Video is the most expensive AI tool to run. Make sure your credit pricing accounts for this before launching it publicly.</div>
+    <textarea id="vg-prompt" placeholder="A time-lapse of a flower blooming in golden light..." style="width:100%;min-height:80px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:.75rem;font-family:inherit;font-size:.85rem;color:var(--txt);outline:none;resize:vertical;margin-bottom:1rem"></textarea>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn-sec" onclick="closeModal()">Cancel</button>
+      <button class="btn-pri" id="vg-btn" onclick="runVideoGen()">✦ Generate Video</button>
+    </div>
+    <div id="vg-status" style="margin-top:.75rem;font-size:.78rem;color:var(--txt3)"></div>
+    <div id="vg-player" style="margin-top:.75rem;display:none"></div>
+  `);
+}
+async function runVideoGen(){
+  const prompt=$('vg-prompt').value.trim();
+  if(!prompt){toast('Enter a description first','⚠');return;}
+  const btn=$('vg-btn');btn.disabled=true;btn.textContent='Submitting…';
+  $('vg-status').textContent='Submitting job…';
+  try{
+    const res=await fetch('/api/video-generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt,model:TOOL_CONFIG['AI Video Generator'].model})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Could not start video generation');
+    const jobId=data.id||data.generation_id;
+    if(!jobId)throw new Error('No job id returned — video generation may not be enabled on your OpenRouter account yet.');
+    $('vg-status').textContent='Generating… this usually takes 1-3 minutes. You can close this and check Projects later.';
+    await pollVideoStatus(jobId,prompt);
+  }catch(err){
+    $('vg-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+    btn.disabled=false;btn.textContent='✦ Generate Video';
+  }
+}
+async function pollVideoStatus(jobId,prompt){
+  const maxTries=40; // ~ up to ~6-7 minutes at growing intervals
+  for(let i=0;i<maxTries;i++){
+    await new Promise(r=>setTimeout(r,10000));
+    try{
+      const res=await fetch(`/api/video-status?id=${encodeURIComponent(jobId)}`);
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||'Status check failed');
+      const status=data.status||data.data?.status;
+      if(status==='completed'){
+        const url=(data.unsigned_urls||data.data?.unsigned_urls||[])[0];
+        if(!url) throw new Error('Video completed but no URL was returned.');
+        const player=$('vg-player');player.style.display='block';
+        player.innerHTML=`<video controls style="width:100%;border-radius:10px" src="${url}"></video>`;
+        $('vg-status').textContent='Done!';
+        await sb.from('projects').insert({user_id:S.user.id,tool_type:'video',title:prompt.slice(0,60),prompt,output_url:url,thumbnail_url:url});
+        toast('Video saved to Projects! 🎉','✅');
+        $('vg-btn').disabled=false;$('vg-btn').textContent='✦ Generate Video';
+        return;
+      }
+      if(status==='failed'||status==='cancelled'||status==='expired'){
+        throw new Error(data.error||`Video generation ${status}`);
+      }
+      $('vg-status').textContent=`Generating… (${status||'processing'}) — checked ${i+1} time(s)`;
+    }catch(err){
+      $('vg-status').innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}</span>`;
+      $('vg-btn').disabled=false;$('vg-btn').textContent='✦ Generate Video';
+      return;
+    }
+  }
+  $('vg-status').innerHTML=`<span style="color:#dc2626">Timed out waiting for the video. Check back later or try again.</span>`;
+  $('vg-btn').disabled=false;$('vg-btn').textContent='✦ Generate Video';
 }
 
 // ── DATE / FORMAT HELPERS
